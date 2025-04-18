@@ -1,12 +1,17 @@
-import Navbar from '../components/Navbar'
+// import Footer from '../components/Footer'
+// import Navbar from '../components/Navbar'
+// import { Layout } from 'lucide-react'
+import Layout from '../layouts/Layout'
 import Hero from './Hero'
 
 function Home() {
   return (
     <>
-      <Navbar/>
-      <Hero/>
-      <h1>it's From Home Page</h1>
+      {/* <Navbar/>
+      <Footer/> */}
+      <Layout>
+        <Hero/>
+      </Layout>
     </>
   )
 }

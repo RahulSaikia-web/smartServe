@@ -535,7 +535,7 @@ const Navbar: React.FC = () => {
       >
         <div className="flex justify-between items-center p-4 border-b">
           <img
-            src="https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_108,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/home-screen/1687285683825-e6cf23.jpeg"
+            src={logo}
             alt="Logo"
             className="h-8 object-contain"
           />
