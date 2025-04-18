@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { ShoppingCart, User, Search } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, User, Search, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const placeholders: string[] = [
   'Search for services...',
@@ -7,10 +8,95 @@ const placeholders: string[] = [
   'What are you looking for?',
 ];
 
+// Provided services data with added IDs
+const servicesData = [
+  {
+    id: 1,
+    name: 'AC Service',
+    image:
+      'https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_56,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/luminosity/1658402794135-faf080.png',
+    description: 'Professional AC servicing including cleaning, gas refill, and maintenance for optimal cooling.',
+    price: '₹799',
+    duration: '1-2 hours',
+    rating: 4.5,
+  },
+  {
+    id: 2,
+    name: 'Salon',
+    image:
+      'https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_56,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/home-screen/1681711961404-75dfec.jpeg',
+    description: 'Premium salon services including haircuts, coloring, and spa treatments at your doorstep.',
+    price: '₹599',
+    duration: '45-90 minutes',
+    rating: 4.7,
+  },
+  {
+    id: 3,
+    name: 'Cleaning',
+    image:
+      'https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_56,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/supply/customer-app-supply/1741326936056-c3a39a.jpeg',
+    description: 'Deep home cleaning services for kitchens, bathrooms, and living spaces.',
+    price: '₹999',
+    duration: '2-3 hours',
+    rating: 4.3,
+  },
+  {
+    id: 4,
+    name: 'Plumbing',
+    image:
+      'https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_56,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/supply/customer-app-supply/1741326936056-c3a39a.jpeg',
+    description: 'Expert plumbing solutions for leaks, installations, and pipe repairs.',
+    price: '₹499',
+    duration: '1-2 hours',
+    rating: 4.4,
+  },
+  {
+    id: 5,
+    name: 'Electrician',
+    image:
+      'https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_56,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/luminosity/1710241114433-5cfa7c.jpeg',
+    description: 'Reliable electrical services for wiring, repairs, and appliance installations.',
+    price: '₹699',
+    duration: '1-3 hours',
+    rating: 4.6,
+  },
+  {
+    id: 6,
+    name: 'Carpentry',
+    image:
+      'https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_56,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/supply/customer-app-supply/1678864013225-bfc1de.jpeg',
+    description: 'Custom carpentry services for furniture repairs and installations.',
+    price: '₹899',
+    duration: '2-4 hours',
+    rating: 4.2,
+  },
+];
+
+interface Service {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  price: string;
+  duration: string;
+  rating: number;
+}
+
 const Navbar: React.FC = () => {
   const [placeholder, setPlaceholder] = useState<string>('');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [services, setServices] = useState<Service[]>([]);
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
+  // Fetch services (using provided data, replace with API call if needed)
+  useEffect(() => {
+    setServices(servicesData);
+  }, []);
+
+  // Typing animation for placeholder
   useEffect(() => {
     let currentIndex = 0;
     let charIndex = 0;
@@ -50,6 +136,37 @@ const Navbar: React.FC = () => {
     return () => clearTimeout();
   }, []);
 
+  // Filter services based on partial match (old search logic)
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredServices([]);
+      return;
+    }
+
+    const filtered = services.filter(
+      (service) =>
+        service.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+        service.description.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    );
+    setFilteredServices(filtered);
+
+    // Debug: Log filtered results
+    console.log('Search Query:', searchQuery);
+    console.log('Filtered Services:', filtered);
+  }, [searchQuery, services]);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery('');
+    setFilteredServices([]);
+    setIsSearchFocused(false);
+  };
+
   return (
     <div className="relative">
       {/* Backdrop for blur effect when sidebar is open */}
@@ -75,14 +192,78 @@ const Navbar: React.FC = () => {
           />
         </div>
 
-        {/* Search Bar */}
-        <div className="hidden md:flex w-full max-w-xs sm:max-w-md mx-4 relative">
+        {/* Search Bar (Desktop) */}
+        <div
+          className="hidden md:flex w-full max-w-xs sm:max-w-md mx-4 relative"
+          ref={searchContainerRef}
+        >
           <input
             type="text"
             placeholder={placeholder}
-            className="w-full border border-gray-200 rounded-full px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-gray-600 placeholder-gray-400 bg-gray-50 hover:bg-white text-sm sm:text-base"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+            className="w-full border border-gray-200 rounded-full px-4 py-2 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-gray-600 placeholder-gray-400 bg-gray-50 hover:bg-white text-sm sm:text-base"
+            aria-label="Search services"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+          {searchQuery && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+          {/* Search Results Dropdown (Desktop) */}
+          {isSearchFocused && filteredServices.length > 0 && (
+            <div
+              className="absolute top-full left-0 mt-2 w-full bg-white shadow-2xl rounded-lg z-50 max-h-96 overflow-y-auto border border-gray-100"
+              role="listbox"
+            >
+              <div className="p-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">Services</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {filteredServices.map((service) => (
+                    <Link
+                      key={service.id}
+                      to={`/booking/${service.id}`}
+                      className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:shadow-md transition-all duration-200"
+                      role="option"
+                      aria-label={`Book ${service.name}`}
+                    >
+                      <img
+                        src={service.image}
+                        alt={service.name}
+                        className="w-12 h-12 object-cover rounded-md mr-3"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800 line-clamp-1">
+                          {service.name}
+                        </p>
+                        <div className="flex items-center mt-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-xs text-gray-600 ml-1">{service.rating}</span>
+                        </div>
+                        <p className="text-sm font-semibold text-blue-600 mt-1">{service.price}</p>
+                        <p className="text-xs text-gray-500 mt-1">{service.duration}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          {isSearchFocused && filteredServices.length === 0 && searchQuery && (
+            <div
+              className="absolute top-full left-0 mt-2 w-full bg-white shadow-2xl rounded-lg z-50 p-4 text-center"
+              role="listbox"
+            >
+              <p className="text-sm text-gray-600">No services found</p>
+            </div>
+          )}
         </div>
 
         {/* Hamburger Menu for Mobile */}
@@ -146,13 +327,74 @@ const Navbar: React.FC = () => {
           </button>
         </div>
         <div className="flex flex-col p-6 space-y-6">
-          <div className="relative">
+          <div className="relative" ref={searchContainerRef}>
             <input
               type="text"
               placeholder={placeholder}
-              className="w-full border border-gray-200 rounded-full px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-gray-600 placeholder-gray-400 bg-gray-50 text-sm"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+              className="w-full border border-gray-200 rounded-full px-4 py-2 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-gray-600 placeholder-gray-400 bg-gray-50 text-sm"
+              aria-label="Search services"
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
+            {/* Search Results in Mobile Sidebar */}
+            {isSearchFocused && filteredServices.length > 0 && (
+              <div
+                className="absolute top-full left-0 mt-2 w-full bg-white shadow-2xl rounded-lg z-50 max-h-96 overflow-y-auto border border-gray-100"
+                role="listbox"
+              >
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Services</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    {filteredServices.map((service) => (
+                      <Link
+                        key={service.id}
+                        to={`/booking/${service.id}`}
+                        className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:shadow-md transition-all duration-200"
+                        role="option"
+                        aria-label={`Book ${service.name}`}
+                      >
+                        <img
+                          src={service.image}
+                          alt={service.name}
+                          className="w-12 h-12 object-cover rounded-md mr-3"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-800 line-clamp-1">
+                            {service.name}
+                          </p>
+                          <div className="flex items-center mt-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="text-xs text-gray-600 ml-1">{service.rating}</span>
+                          </div>
+                          <p className="text-sm font-semibold text-blue-600 mt-1">{service.price}</p>
+                          <p className="text-xs text-gray-500 mt-1">{service.duration}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            {isSearchFocused && filteredServices.length === 0 && searchQuery && (
+              <div
+                className="absolute top-full left-0 mt-2 w-full bg-white shadow-2xl rounded-lg z-50 p-4 text-center"
+                role="listbox"
+              >
+                <p className="text-sm text-gray-600">No services found</p>
+              </div>
+            )}
           </div>
           <button className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition py-2">
             <ShoppingCart className="w-6 h-6" />
