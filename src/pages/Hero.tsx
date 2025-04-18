@@ -136,7 +136,7 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col md:flex-row items-center justify-between bg-gray-50 px-4 sm:px-6 lg:px-12 py-12 mt-16 md:mt-20">
+    <div className="w-full min-h-screen flex flex-col md:flex-row items-center justify-between bg-gray-50 px-4 sm:px-6 lg:px-12 py-12 mt-32 md:mt-36">
       {/* Left Side */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-start space-y-8 h-full">
         {/* Big Text */}
@@ -146,7 +146,7 @@ const Hero: React.FC = () => {
 
         {/* Box with Small Boxes */}
         <div className="w-full max-w-lg border border-gray-200 rounded-lg p-6 bg-white shadow-md">
-          <div className="grid grid-cols-3 gap- pandem4">
+          <div className="grid grid-cols-3 gap-4">
             {services.map((service, index) => (
               <div
                 key={index}
@@ -169,7 +169,7 @@ const Hero: React.FC = () => {
         </div>
 
         {/* Service Rating and Customers */}
-        <div className="flex flex-col sm:flex-row items-start space-y-6 sm:space-y-0 sm:space-x-8 w-full max-w-lg">
+        <div className="flex flex-row flex-wrap items-start gap-6 w-full max-w-lg">
           {/* Rating */}
           <div className="flex items-center space-x-4">
             {ratingData.icon}
@@ -190,7 +190,7 @@ const Hero: React.FC = () => {
       </div>
 
       {/* Right Side */}
-      <div className="w-full md:w-1/2 flex justify-center items-center h-full mt-8 md:mt-0">
+      <div className="hidden md:block md:w-1/2 flex justify-center items-center h-full">
         <img
           src="https://res.cloudinary.com/urbanclap/image/upload/t_high_res_template,q_auto:low,f_auto/dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/home-screen/1696852847761-574450.jpeg"
           alt="Hero Image"

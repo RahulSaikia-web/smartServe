@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, User, Search, Star } from 'lucide-react';
+import { ShoppingCart, User, Search, Star, Phone, HelpCircle, BookOpen, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png'
 
 const placeholders: string[] = [
   'Search for services...',
@@ -8,7 +9,6 @@ const placeholders: string[] = [
   'What are you looking for?',
 ];
 
-// Provided services data with added IDs
 const servicesData = [
   {
     id: 1,
@@ -82,6 +82,172 @@ interface Service {
   rating: number;
 }
 
+const LoginModal: React.FC<{ isOpen: boolean; onClose: () => void; onLogin: () => void }> = ({
+  isOpen,
+  onClose,
+  onLogin,
+}) => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [error, setError] = useState('');
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handlePhoneSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{10}$/.test(phoneNumber)) {
+      setError('Please enter a valid 10-digit phone number');
+      return;
+    }
+    setError('');
+    setStep('otp');
+    console.log('Sending OTP to:', phoneNumber);
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d?$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedData = e.clipboardData.getData('text').trim();
+    if (/^\d{6}$/.test(pastedData)) {
+      const newOtp = pastedData.split('');
+      setOtp(newOtp);
+      otpInputRefs.current[5]?.focus();
+    }
+    e.preventDefault();
+  };
+
+  const handleOtpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const otpValue = otp.join('');
+    if (!/^\d{6}$/.test(otpValue)) {
+      setError('Please enter a valid 6-digit OTP');
+      return;
+    }
+    setError('');
+    console.log('Verifying OTP:', otpValue);
+    onLogin();
+    alert('Login successful!');
+    onClose();
+    setPhoneNumber('');
+    setOtp(['', '', '', '', '', '']);
+    setStep('phone');
+  };
+
+  const handleClose = () => {
+    setPhoneNumber('');
+    setOtp(['', '', '', '', '', '']);
+    setError('');
+    setStep('phone');
+    onClose();
+  };
+
+  return (
+    <div
+      className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+        isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
+      <div
+        className={`bg-white w-full max-w-md rounded-2xl p-6 transform transition-transform duration-300 ${
+          isOpen ? 'translate-y-0 scale-100' : 'translate-y-20 scale-95'
+        } shadow-xl`}
+      >
+        <button
+          onClick={handleClose}
+          className="absolute -top-4 -right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition"
+          aria-label="Close modal"
+        >
+          <svg
+            className="w-6 h-6 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <div className="flex flex-col items-center">
+          <div className="bg-blue-100 rounded-full p-4 mb-4">
+            <Phone className="w-12 h-12 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Enter your phone number</h2>
+          <p className="text-gray-600 text-center mb-6">
+            We’ll send you a text with a verification code
+          </p>
+          {step === 'phone' ? (
+            <form onSubmit={handlePhoneSubmit} className="w-full">
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter 10-digit phone number"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                aria-label="Phone number"
+              />
+              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition"
+              >
+                Continue
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpSubmit} className="w-full">
+              <div className="flex justify-center space-x-2 mb-4">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onPaste={index === 0 ? handleOtpPaste : undefined}
+                    maxLength={1}
+                    ref={(el) => (otpInputRefs.current[index] = el)}
+                    className="w-10 h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-lg"
+                    aria-label={`OTP digit ${index + 1}`}
+                  />
+                ))}
+              </div>
+              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition"
+              >
+                Verify OTP
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Navbar: React.FC = () => {
   const [placeholder, setPlaceholder] = useState<string>('');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
@@ -89,14 +255,18 @@ const Navbar: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState<boolean>(false);
+  const [isMobileProfileDropdownOpen, setIsMobileProfileDropdownOpen] = useState<boolean>(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch services (using provided data, replace with API call if needed)
   useEffect(() => {
     setServices(servicesData);
   }, []);
 
-  // Typing animation for placeholder
   useEffect(() => {
     let currentIndex = 0;
     let charIndex = 0;
@@ -136,7 +306,6 @@ const Navbar: React.FC = () => {
     return () => clearTimeout();
   }, []);
 
-  // Filter services based on partial match (old search logic)
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredServices([]);
@@ -149,50 +318,71 @@ const Navbar: React.FC = () => {
         service.description.toLowerCase().includes(searchQuery.trim().toLowerCase())
     );
     setFilteredServices(filtered);
-
-    // Debug: Log filtered results
-    console.log('Search Query:', searchQuery);
-    console.log('Filtered Services:', filtered);
   }, [searchQuery, services]);
 
-  // Handle search input change
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        profileButtonRef.current &&
+        !profileButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  // Clear search
   const clearSearch = () => {
     setSearchQuery('');
     setFilteredServices([]);
     setIsSearchFocused(false);
   };
 
+  const handleProfileClick = (isMobile: boolean) => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+    } else {
+      if (isMobile) {
+        setIsMobileProfileDropdownOpen(!isMobileProfileDropdownOpen);
+      } else {
+        setIsProfileDropdownOpen(!isProfileDropdownOpen);
+      }
+    }
+  };
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsProfileDropdownOpen(false);
+    setIsMobileProfileDropdownOpen(false);
+    console.log('User logged out');
+  };
+
   return (
     <div className="relative">
-      {/* Backdrop for blur effect when sidebar is open */}
-      {menuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-40 transition-all duration-300"
-          onClick={() => setMenuOpen(false)}
-        ></div>
-      )}
-
-      {/* Main Navbar */}
       <nav
         className={`w-full bg-white shadow-lg py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between fixed top-0 z-50 transition-all duration-300 ${
           menuOpen ? 'blur-sm' : ''
         }`}
       >
-        {/* Logo */}
         <div className="flex items-center">
           <img
-            src="https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_108,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/home-screen/1687285683825-e6cf23.jpeg"
+            src={logo}
             alt="Logo"
             className="h-8 sm:h-10 object-contain"
           />
         </div>
-
-        {/* Search Bar (Desktop) */}
         <div
           className="hidden md:flex w-full max-w-xs sm:max-w-md mx-4 relative"
           ref={searchContainerRef}
@@ -217,7 +407,6 @@ const Navbar: React.FC = () => {
               ×
             </button>
           )}
-          {/* Search Results Dropdown (Desktop) */}
           {isSearchFocused && filteredServices.length > 0 && (
             <div
               className="absolute top-full left-0 mt-2 w-full bg-white shadow-2xl rounded-lg z-50 max-h-96 overflow-y-auto border border-gray-100"
@@ -265,8 +454,6 @@ const Navbar: React.FC = () => {
             </div>
           )}
         </div>
-
-        {/* Hamburger Menu for Mobile */}
         <div className="md:hidden flex items-center">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -292,21 +479,55 @@ const Navbar: React.FC = () => {
             </div>
           </button>
         </div>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+        <div className="hidden md:flex items-center space-x-6 lg:space-x-8 relative">
           <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition">
             <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="font-medium text-sm sm:text-base">Cart</span>
           </button>
-          <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition">
-            <User className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="font-medium text-sm sm:text-base">Profile</span>
-          </button>
+          <div className="relative">
+            <button
+              ref={profileButtonRef}
+              onClick={() => handleProfileClick(false)}
+              className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition"
+            >
+              <User className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="font-medium text-sm sm:text-base">
+                {isLoggedIn ? 'Profile' : 'Login'}
+              </span>
+            </button>
+            {isLoggedIn && isProfileDropdownOpen && (
+              <div
+                ref={dropdownRef}
+                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50 animate-dropdown"
+              >
+                <Link
+                  to="/help-center"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
+                  onClick={() => setIsProfileDropdownOpen(false)}
+                >
+                  <HelpCircle className="w-5 h-5 mr-2" />
+                  <span className="text-sm font-medium">Help Center</span>
+                </Link>
+                <Link
+                  to="/my-bookings"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
+                  onClick={() => setIsProfileDropdownOpen(false)}
+                >
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  <span className="text-sm font-medium">My Bookings</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition text-left"
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  <span className="text-sm font-medium">Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
-
-      {/* Mobile Sidebar */}
       <div
         className={`md:hidden fixed top-0 right-0 w-3/4 max-w-sm h-full bg-white shadow-2xl transform ${
           menuOpen ? 'translate-x-0' : 'translate-x-full'
@@ -348,7 +569,6 @@ const Navbar: React.FC = () => {
                 ×
               </button>
             )}
-            {/* Search Results in Mobile Sidebar */}
             {isSearchFocused && filteredServices.length > 0 && (
               <div
                 className="absolute top-full left-0 mt-2 w-full bg-white shadow-2xl rounded-lg z-50 max-h-96 overflow-y-auto border border-gray-100"
@@ -400,12 +620,76 @@ const Navbar: React.FC = () => {
             <ShoppingCart className="w-6 h-6" />
             <span className="text-lg font-medium">Cart</span>
           </button>
-          <button className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition py-2">
-            <User className="w-6 h-6" />
-            <span className="text-lg font-medium">Profile</span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => handleProfileClick(true)}
+              className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition py-2 w-full"
+            >
+              <User className="w-6 h-6" />
+              <span className="text-lg font-medium">{isLoggedIn ? 'Profile' : 'Login'}</span>
+            </button>
+            {isLoggedIn && isMobileProfileDropdownOpen && (
+              <div
+                className={`bg-gray-50 rounded-lg overflow-hidden transition-all duration-300 ease-in-out ${
+                  isMobileProfileDropdownOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <Link
+                  to="/help-center"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
+                  onClick={() => {
+                    setIsMobileProfileDropdownOpen(false);
+                    setMenuOpen(false);
+                  }}
+                >
+                  <HelpCircle className="w-5 h-5 mr-2" />
+                  <span className="text-sm font-medium">Help Center</span>
+                </Link>
+                <Link
+                  to="/my-bookings"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
+                  onClick={() => {
+                    setIsMobileProfileDropdownOpen(false);
+                    setMenuOpen(false);
+                  }}
+                >
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  <span className="text-sm font-medium">My Bookings</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition text-left"
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  <span className="text-sm font-medium">Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLogin={handleLogin}
+      />
+      <style>
+        {`
+          @keyframes dropdown {
+            0% {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .animate-dropdown {
+            animation: dropdown 0.2s ease-out;
+          }
+        `}
+      </style>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Loading.css'; // Create this CSS file
+import logo from '../assets/logo.png'
 
 const Loading = () => {
   const [progress, setProgress] = useState(0);
@@ -22,7 +23,7 @@ const Loading = () => {
     <div className="loader">
       <img
         id="logo"
-        src="https://res.cloudinary.com/urbanclap/image/upload/t_high_res_category/w_108,dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/home-screen/1687285683825-e6cf23.jpeg"
+        src={logo}
         alt="Website Logo"
       />
       <div className="progress">
