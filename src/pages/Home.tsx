@@ -3,6 +3,7 @@
 // import { Layout } from 'lucide-react'
 import Layout from '../layouts/Layout'
 import Hero from './Hero'
+import MostBooked from './MostBooked'
 
 function Home() {
   return (
@@ -11,6 +12,7 @@ function Home() {
       <Footer/> */}
       <Layout>
         <Hero/>
+        <MostBooked/>
       </Layout>
     </>
   )

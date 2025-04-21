@@ -136,11 +136,11 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col md:flex-row items-center justify-between bg-gray-50 px-4 sm:px-6 lg:px-12 py-12 mt-10 md:mt-36">
+    <div className="w-full h-full flex flex-col md:flex-row items-center justify-between bg-gray-50 px-4 sm:px-6 lg:px-12 py-12 mt-550 md:mt-36">
       {/* Left Side */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-start space-y-8 h-full">
         {/* Big Text */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight  mt-[500px]">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight mt-300">
           Home services at your doorstep
         </h1>
 
@@ -190,7 +190,7 @@ const Hero: React.FC = () => {
       </div>
 
       {/* Right Side */}
-      <div className="hidden md:block md:w-1/2 flex justify-center items-center h-full mt-50">
+      <div className="hidden md:block md:w-1/2 flex justify-center items-center h-full mt-300">
         <img
           src="https://res.cloudinary.com/urbanclap/image/upload/t_high_res_template,q_auto:low,f_auto/dpr_1,fl_progressive:steep,q_auto:low,f_auto,c_limit/images/growth/home-screen/1696852847761-574450.jpeg"
           alt="Hero Image"

@@ -160,22 +160,22 @@ const LoginModal: React.FC<{ isOpen: boolean; onClose: () => void; onLogin: () =
 
   return (
     <div
-      className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+      className={`fixed inset-0 flex items-center justify-center z-50 backdrop-blur-md transition-opacity duration-300 ${
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
       <div
-        className={`bg-white w-full max-w-md rounded-2xl p-6 transform transition-transform duration-300 ${
-          isOpen ? 'translate-y-0 scale-100' : 'translate-y-20 scale-95'
-        } shadow-xl`}
+        className={`bg-white w-full max-w-[90%] sm:max-w-md rounded-2xl p-4 sm:p-6 transform transition-all duration-300 ${
+          isOpen ? 'translate-y-0 scale-100' : 'translate-y-10 scale-95'
+        } shadow-xl mx-4 sm:mx-0`}
       >
         <button
           onClick={handleClose}
-          className="absolute -top-4 -right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition"
+          className="absolute -top-3 -right-3 bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:bg-gray-100 transition"
           aria-label="Close modal"
         >
           <svg
-            className="w-6 h-6 text-gray-600"
+            className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -190,12 +190,16 @@ const LoginModal: React.FC<{ isOpen: boolean; onClose: () => void; onLogin: () =
           </svg>
         </button>
         <div className="flex flex-col items-center">
-          <div className="bg-blue-100 rounded-full p-4 mb-4">
-            <Phone className="w-12 h-12 text-blue-600" />
+          <div className="bg-blue-100 rounded-full p-3 sm:p-4 mb-3 sm:mb-4">
+            <Phone className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Enter your phone number</h2>
-          <p className="text-gray-600 text-center mb-6">
-            We’ll send you a text with a verification code
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 text-center">
+            {step === 'phone' ? 'Enter your phone number' : 'Enter OTP'}
+          </h2>
+          <p className="text-gray-600 text-sm sm:text-base text-center mb-4 sm:mb-6 px-2">
+            {step === 'phone'
+              ? 'We’ll send you a text with a verification code'
+              : 'Enter the 6-digit code sent to your phone'}
           </p>
           {step === 'phone' ? (
             <form onSubmit={handlePhoneSubmit} className="w-full">
@@ -204,20 +208,20 @@ const LoginModal: React.FC<{ isOpen: boolean; onClose: () => void; onLogin: () =
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="Enter 10-digit phone number"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-3 mb-3 sm:mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-sm sm:text-base"
                 aria-label="Phone number"
               />
-              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+              {error && <p className="text-red-500 text-xs sm:text-sm mb-3 sm:mb-4">{error}</p>}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition"
+                className="w-full bg-blue-600 text-white rounded-lg py-2 sm:py-3 font-semibold hover:bg-blue-700 transition text-sm sm:text-base"
               >
                 Continue
               </button>
             </form>
           ) : (
             <form onSubmit={handleOtpSubmit} className="w-full">
-              <div className="flex justify-center space-x-2 mb-4">
+              <div className="flex justify-center space-x-1 sm:space-x-2 mb-3 sm:mb-4">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -228,15 +232,15 @@ const LoginModal: React.FC<{ isOpen: boolean; onClose: () => void; onLogin: () =
                     onPaste={index === 0 ? handleOtpPaste : undefined}
                     maxLength={1}
                     ref={(el) => (otpInputRefs.current[index] = el)}
-                    className="w-10 h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-lg"
+                    className="w-8 h-8 sm:w-10 sm:h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-base sm:text-lg"
                     aria-label={`OTP digit ${index + 1}`}
                   />
                 ))}
               </div>
-              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+              {error && <p className="text-red-500 text-xs sm:text-sm mb-3 sm:mb-4">{error}</p>}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition"
+                className="w-full bg-blue-600 text-white rounded-lg py-2 sm:py-3 font-semibold hover:bg-blue-700 transition text-sm sm:text-base"
               >
                 Verify OTP
               </button>
